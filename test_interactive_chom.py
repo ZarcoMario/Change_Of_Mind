@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from change_of_mind import _get_baseline_trial_number_fin_pos
+from change_of_mind import _get_baseline_trial_number_fin_pos, _get_points_convex_hull
 
 
 path_ = r"C:\Users\mzar066\Downloads\F2_P01\S001\trial_results.csv"
@@ -25,4 +25,7 @@ for xy in fin_pos_xy:
     trial_num += 1
 print(fin_pos)
 
-_get_baseline_trial_number_fin_pos(fin_pos)
+number_bl_trials = _get_baseline_trial_number_fin_pos(fin_pos)
+
+_get_points_convex_hull(number_bl_trials, )
+

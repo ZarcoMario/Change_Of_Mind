@@ -92,6 +92,8 @@ def _get_points_convex_hull(number_baseline_trials: list[np.array],
             points_convex_hull[direction].append(np.column_stack([m_dim1 - s_dim1, m_dim2 - s_dim2]))
             points_convex_hull[direction].append(np.column_stack([m_dim1 + s_dim1, m_dim2 - s_dim2]))
 
+    return points_convex_hull
+
 
 def _get_convex_hull():
     pass
