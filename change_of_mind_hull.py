@@ -1,102 +1,6 @@
-'''
-
-'''
-
 import numpy as np
 from scipy.spatial import Delaunay
 from utils import get_groups_from_indexes, samples_outside_region
-
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-
-
-def _center_fin_pos(fin_pos_xy):
-    min_ = np.min(fin_pos_xy[:, 1])
-    max_ = np.max(fin_pos_xy[:, 1])
-    fin_pos_xy[:, 1] = fin_pos_xy[:, 1] - 0.5 * (min_ + max_)
-
-    fin_pos = np.zeros(fin_pos_xy.shape)
-
-    for i, xy in enumerate(fin_pos_xy):
-        if np.abs(xy[0]) > np.abs(xy[1]):
-            fin_pos[i, 0] = xy[0]
-        else:
-            fin_pos[i, 1] = xy[1]
-
-    return fin_pos
-
-
-def _get_baseline_trial_number_fin_pos(fin_pos: np.array) -> list[np.array]:
-    # fin_pos is a numpy array of dimension (n, 2)
-    # if the second column is zeros, there are only two targets
-    cond_ = fin_pos[:, 1] == 0
-    if np.sum(cond_.astype(int)) == fin_pos.shape[0]:
-        # Two targets
-        # x | -x
-        number_baseline_trials = np.full((2, fin_pos.shape[0]), None)
-    else:
-        # Four Targets
-        # x | -x | y | -y
-        number_baseline_trials = np.full((4, fin_pos.shape[0]), None)
-    # i = 0
-    for num, pos in enumerate(fin_pos):
-        if np.abs(pos[0]) > np.abs(pos[1]):
-            # Target along x
-            if pos[0] > 0:
-                number_baseline_trials[0, num] = num
-            else:
-                number_baseline_trials[1, num] = num
-        else:
-            # Target along y
-            if pos[1] > 0:
-                number_baseline_trials[2, num] = num
-            else:
-                number_baseline_trials[3, num] = num
-    # Get rid of Nones
-    list_number_bst = []
-    for i in range(number_baseline_trials.shape[0]):
-        row = number_baseline_trials[i, :]
-        row = row[row is not None]
-        list_number_bst.append(row)
-
-    return list_number_bst
-
-
-def _get_points_convex_hull(number_baseline_trials: list[np.array],
-                            baseline_trials_dim_1: np.array,
-                            baseline_trials_dim_2: np.array,
-                            n_std: float) -> list[np.array]:
-
-    points_convex_hull = [[] for _ in range(len(number_baseline_trials))]
-    for direction, n_bl_trials in enumerate(number_baseline_trials):
-        # For each dimension get the mean and std
-        # Get the points
-        m_dim1 = np.mean(baseline_trials_dim_1[n_bl_trials], axis=0)
-        m_dim2 = np.mean(baseline_trials_dim_2[n_bl_trials], axis=0)
-
-        s_dim1 = n_std * np.std(baseline_trials_dim_1[n_bl_trials], axis=0)
-        s_dim2 = n_std * np.std(baseline_trials_dim_2[n_bl_trials], axis=0)
-
-        if direction == 0: # RIGHT
-            points_convex_hull[direction].append(np.column_stack([m_dim1 - s_dim1, m_dim2 + s_dim2]))
-            points_convex_hull[direction].append(np.column_stack([m_dim1 + s_dim1, m_dim2 - s_dim2]))
-        elif direction == 1: # LEFT
-            points_convex_hull[direction].append(np.column_stack([m_dim1 - s_dim1, m_dim2 - s_dim2]))
-            points_convex_hull[direction].append(np.column_stack([m_dim1 + s_dim1, m_dim2 + s_dim2]))
-
-        # TODO: DOUBLE CHECK THIS BY PLOTTING
-        elif direction == 2: # UP
-            points_convex_hull[direction].append(np.column_stack([m_dim1 - s_dim1, m_dim2 + s_dim2]))
-            points_convex_hull[direction].append(np.column_stack([m_dim1 + s_dim1, m_dim2 + s_dim2]))
-        else: # DOWN
-            points_convex_hull[direction].append(np.column_stack([m_dim1 - s_dim1, m_dim2 - s_dim2]))
-            points_convex_hull[direction].append(np.column_stack([m_dim1 + s_dim1, m_dim2 - s_dim2]))
-
-    return points_convex_hull
-
-
-def _get_convex_hull():
-    pass
 
 
 def set_zones_changes_of_mind(data_bl_trials_x, data_bl_trials_y, fin_pos_x, n_std=1.5):
@@ -167,6 +71,7 @@ def get_change_of_mind(left_hull, right_hull, x, y, n_points=5, center=np.array(
         mask_left = np.full(x.shape, True)
         mask_right = np.full(x.shape, True)
         points_t = np.column_stack((x, y))
+        # Points inside
         idx_left = left_hull.find_simplex(points_t) < 0
         idx_right = right_hull.find_simplex(points_t) < 0
 
