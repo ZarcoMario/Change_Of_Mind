@@ -224,10 +224,11 @@ def get_changes_of_mind_two_targets(polygons_list: list[Polygon],
         return 0
 
 
-def _fun(target_direction, other_directions, polygons_list,
-         data_dim1, data_dim2,
-         n_points,
-         center, radius):
+def _change_of_mind(target_direction, other_directions, polygons_list,
+                    data_dim1, data_dim2,
+                    n_points,
+                    center, radius):
+    
     s = GeoSeries(map(Point, zip(data_dim1, data_dim2)))
     indexes = np.arange(0, data_dim1.size, 1)
     idx_target_direction = indexes[s.within(polygons_list[target_direction])]
@@ -237,11 +238,27 @@ def _fun(target_direction, other_directions, polygons_list,
         groups_other_directions.append(
             get_groups_from_indexes(indexes[s.within(polygons_list[direction])])
         )
+
+    res = np.zeros(other_directions.size)
+    j = 0
     for group in groups_other_directions:
         for idx_other_direction in group:
 
-            if samples_outside_region(np.column_stack((data_dim1, data_dim2))[idx_left],
+            if samples_outside_region(np.column_stack((data_dim1, data_dim2))[idx_other_direction],
                                       center, radius, n_points):
+                i = 0
+                for element in data_dim1[idx_target_direction]:
+                    if element in data_dim1[idx_other_direction]:
+                        i += 1
+
+                if idx_other_direction.size - i >= n_points:
+                    # return 1
+                    res[j] = 1
+                    break
+
+        j += 1
+
+    return res
 
 
 def get_changes_of_mind_four_targets(polygons_list: list[Polygon],
@@ -253,9 +270,11 @@ def get_changes_of_mind_four_targets(polygons_list: list[Polygon],
                                     radius: float = 0) -> int:
 
     if data_direction == "right":
-        pass
+        res = _change_of_mind(0, np.array([1]), polygons_list, data_dim1, data_dim2, n_points, center, radius)
+        print(res)
     elif data_direction == "left":
-        pass
+        res = _change_of_mind(1, np.array([0]), polygons_list, data_dim1, data_dim2, n_points, center, radius)
+        print(res)
     elif data_direction == "up":
         pass
     elif data_direction == "down":
