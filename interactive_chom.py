@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
 from align_trajectories import align_trial_start
-from change_of_mind_shapely import set_zones_changes_of_mind
+from change_of_mind_shapely import set_zones_changes_of_mind, get_changes_of_mind_two_targets
 
 
 class InteractiveTrajectories:
@@ -40,7 +40,7 @@ class InteractiveTrajectories:
         self.ax.grid(True)
         self.lines = []
         self.lines_color = []
-        self.lines_convexhull = []
+        self.lines_polygon = []
         self.picked = np.full(u_bound - l_bound + 1, True)
         self.plot_trajectories()
         self.connect()
@@ -68,17 +68,6 @@ class InteractiveTrajectories:
             if self.n_targets == 2:
                 # Two-target version (assuming the change along x on Unity)
                 self.fin_pos[trial_num - 1, 0] = data_dim_1[-1]
-            else:
-                # Four-target condition
-                if np.abs(data_dim_1[-1]) > np.abs(data_dim_2[-1]):
-                    # Target along x
-                    self.fin_pos[trial_num - 1, 0] = data_dim_1[-1]
-                elif np.abs(data_dim_1[-1]) < np.abs(data_dim_2[-1]):
-                    # Target along y
-                    self.fin_pos[trial_num - 1, 1] = data_dim_2[-1]
-                else:
-                    # I am not checking validity here. Is there any other odd case?
-                    pass
 
         # Convert to numpy so that they can be masked
         self.baseline_trials_dim_1 = np.array(self.baseline_trials_dim_1)
@@ -87,19 +76,14 @@ class InteractiveTrajectories:
         if self.n_targets == 2:
 
             # Update the zones for changes of mind
-            left_hull, right_hull, left_points_convex_hull, right_points_convex_hull = set_zones_changes_of_mind(
-                self.baseline_trials_dim_1, self.baseline_trials_dim_2, self.fin_pos[:, 0], n_std=self.n_std)
+            polygons_list, points_list = set_zones_changes_of_mind(
+                self.baseline_trials_dim_1, self.baseline_trials_dim_2, self.fin_pos, n_std=self.n_std)
 
-            # Redraw the zones
-            # Plot Left Convex Hull
-            for simplex in ConvexHull(left_points_convex_hull).simplices:
-                line, = self.ax.plot(left_points_convex_hull[simplex, 0], left_points_convex_hull[simplex, 1], 'k-')
-                self.lines_convexhull.append(line)
-
-            # Plot Right Convex Hull
-            for simplex in ConvexHull(right_points_convex_hull).simplices:
-                line, = self.ax.plot(right_points_convex_hull[simplex, 0], right_points_convex_hull[simplex, 1], 'k-')
-                self.lines_convexhull.append(line)
+            # Draw the zones
+            for polygon_ in polygons_list:
+                x, y = polygon_.exterior.xy
+                l, = self.ax.plot(x, y, 'k-')
+                self.lines_polygon.append(l)
 
         return
 
@@ -120,36 +104,34 @@ class InteractiveTrajectories:
 
         if self.n_targets == 2:
 
-            # Update the zones for changes of mind
-            left_hull, right_hull, left_points_convex_hull, right_points_convex_hull = set_zones_changes_of_mind(
-                self.baseline_trials_dim_1[self.picked], self.baseline_trials_dim_2[self.picked],
-                self.fin_pos[self.picked, 0], n_std=self.n_std)
-
             # Redraw the zones
-            for line in self.lines_convexhull:
+            # TODO: REDRAW POLYGONS
+            for line in self.lines_polygon:
                 line.remove()
-            self.lines_convexhull = []
+            self.lines_polygon = []
 
-            # Plot Left Convex Hull
-            for simplex in ConvexHull(left_points_convex_hull).simplices:
-                line, = self.ax.plot(left_points_convex_hull[simplex, 0], left_points_convex_hull[simplex, 1], 'k-')
-                self.lines_convexhull.append(line)
+            # Update the zones for changes of mind
+            polygons_list, points_list = set_zones_changes_of_mind(
+                self.baseline_trials_dim_1[self.picked], self.baseline_trials_dim_2[self.picked],
+                self.fin_pos[self.picked], n_std=self.n_std)
 
-            # Plot Right Convex Hull
-            for simplex in ConvexHull(right_points_convex_hull).simplices:
-                line, = self.ax.plot(right_points_convex_hull[simplex, 0], right_points_convex_hull[simplex, 1], 'k-')
-                self.lines_convexhull.append(line)
+            # Draw the zones
+            for polygon_ in polygons_list:
+                x, y = polygon_.exterior.xy
+                l, = self.ax.plot(x, y, 'k-')
+                self.lines_polygon.append(l)
 
         self.fig.canvas.draw()
         return
 
     def on_close(self, event):
-        # Save discarded trials
+        print("Save the Baseline Trials that will be used -- Update the on_close method in this class")
+        # Save useful baseline trials
         # dict_res = {
         #     'trial_num': self.trials,
-        #     'incorrect': self.picked.astype(int)
+        #     'correct': self.picked.astype(int)
         # }
-        # pd.DataFrame.from_dict(dict_res).to_csv(self.path_folder + r"\movement_termination_incorrect.csv", index=False)
+        # pd.DataFrame.from_dict(dict_res).to_csv(self.path_folder + r"\baseline_trials_correct.csv", index=False)
         pass
 
 

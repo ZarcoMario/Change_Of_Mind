@@ -89,9 +89,9 @@ def _get_points_and_polygon(number_baseline_trials: list[np.array],
         s_dim2 = n_std * np.std(baseline_trials_dim_2[n_bl_trials], axis=0)
 
         # The limits used for RIGHT AND LEFT come from a MATLAB file Chris provided (afaik)
-        # I did not have time to verify the limist for UP AND DOWN. So, change them appropriately
+        # I did not have time to verify the limits for UP AND DOWN. So, change them appropriately
+        # NOTICE THAT THE SECOND ARRAY HAS BEEN FLIPPED SO THAT THE POINTS FOLLOW AN ODER TO CREATE THE POLYGON
         if direction == 0: # RIGHT
-            # NOTICE THAT THE SECOND ARRAY HAS BEEN FLIPPED SO THAT THE POINTS FOLLOW AN ODER TO CREATE THE POLYGON
             points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 + s_dim2)),
                                 np.column_stack((m_dim1 + s_dim1, m_dim2 - s_dim2))[::-1], axis=0)
             points_list.append(points_)
@@ -228,7 +228,7 @@ def _change_of_mind(target_direction, other_directions, polygons_list,
                     data_dim1, data_dim2,
                     n_points,
                     center, radius):
-    
+
     s = GeoSeries(map(Point, zip(data_dim1, data_dim2)))
     indexes = np.arange(0, data_dim1.size, 1)
     idx_target_direction = indexes[s.within(polygons_list[target_direction])]
@@ -267,21 +267,35 @@ def get_changes_of_mind_four_targets(polygons_list: list[Polygon],
                                     data_direction: str,
                                     n_points: int = 5,
                                     center: np.array = np.array([0, 0]),
-                                    radius: float = 0) -> int:
-
+                                    radius: float = 0) -> np.array:
+    res = np.full(4, -1)
     if data_direction == "right":
-        res = _change_of_mind(0, np.array([1]), polygons_list, data_dim1, data_dim2, n_points, center, radius)
-        print(res)
+        dir_target = 0
+        dir_others = np.array([1, 2, 3])
+        chom = _change_of_mind(dir_target, dir_others, polygons_list, data_dim1, data_dim2, n_points, center, radius)
+        res[dir_others] = np.array(chom)
+        return res
     elif data_direction == "left":
-        res = _change_of_mind(1, np.array([0]), polygons_list, data_dim1, data_dim2, n_points, center, radius)
-        print(res)
+        dir_target = 1
+        dir_others = np.array([0, 2, 3])
+        chom = _change_of_mind(dir_target, dir_others, polygons_list, data_dim1, data_dim2, n_points, center, radius)
+        res[dir_others] = chom
+        return res
     elif data_direction == "up":
-        pass
+        dir_target = 2
+        dir_others = np.array([0, 1, 3])
+        chom = _change_of_mind(dir_target, dir_others, polygons_list, data_dim1, data_dim2, n_points, center, radius)
+        res[dir_others] = chom
+        return res
     elif data_direction == "down":
-        pass
+        dir_target = 3
+        dir_others = np.array([0, 1, 2])
+        chom = _change_of_mind(dir_target, dir_others, polygons_list, data_dim1, data_dim2, n_points, center, radius)
+        res[dir_others] = chom
+        return res
     else:
         print("Incorrect Data Direction")
-        return -1
+        return np.full(4, None)
 
 
 
