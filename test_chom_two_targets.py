@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from align_trajectories import align_trial_start
 
-from change_of_mind_shapely import set_zones_changes_of_mind, get_changes_of_mind_two_targets
+from change_of_mind import set_zones_changes_of_mind, get_changes_of_mind_two_targets
 
 dataset = "VR-S1"
 path_ = dataset + r"\P01\trial_results.csv"

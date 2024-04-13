@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
 from align_trajectories import align_trial_start
-from change_of_mind_shapely import set_zones_changes_of_mind, get_changes_of_mind_two_targets
+from change_of_mind import set_zones_changes_of_mind, get_changes_of_mind_two_targets
 
 
 class InteractiveTrajectories:
