@@ -36,7 +36,7 @@ for trial_number in range(1, n_baseline_trials + 1):
     data_bl_trials_dim2.append(z)
 
 polygons_list, points_list = set_zones_changes_of_mind(np.array(data_bl_trials_dim1), np.array(data_bl_trials_dim2),
-                                                       fin_pos_xy, 1.5)
+                                                       fin_pos_xy, n_std=1.5, experiment_type="\/")
 
 for trial_number in range(n_baseline_trials + 1, 284 + 1):
 

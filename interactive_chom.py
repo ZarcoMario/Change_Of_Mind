@@ -77,7 +77,8 @@ class InteractiveTrajectories:
 
             # Update the zones for changes of mind
             polygons_list, points_list = set_zones_changes_of_mind(
-                self.baseline_trials_dim_1, self.baseline_trials_dim_2, self.fin_pos, n_std=self.n_std)
+                self.baseline_trials_dim_1, self.baseline_trials_dim_2, self.fin_pos,
+                n_std=self.n_std, experiment_type="\/")
 
             # Draw the zones
             for polygon_ in polygons_list:
@@ -113,7 +114,7 @@ class InteractiveTrajectories:
             # Update the zones for changes of mind
             polygons_list, points_list = set_zones_changes_of_mind(
                 self.baseline_trials_dim_1[self.picked], self.baseline_trials_dim_2[self.picked],
-                self.fin_pos[self.picked], n_std=self.n_std)
+                self.fin_pos[self.picked], n_std=self.n_std, experiment_type="\/")
 
             # Draw the zones
             for polygon_ in polygons_list:

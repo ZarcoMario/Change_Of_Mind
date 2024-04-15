@@ -34,7 +34,7 @@ for trial_number in range(1, n_baseline_trials + 1):
     data_bl_trials_dim2.append(y)
 
 polygons_list, points_list = set_zones_changes_of_mind(np.array(data_bl_trials_dim1), np.array(data_bl_trials_dim2),
-                                                       fin_pos_xy, 1.5)
+                                                       fin_pos_xy, n_std=1.5, experiment_type="+")
 
 direction = pd.read_csv(path_, usecols=["central_stimulus_direction"])["central_stimulus_direction"].to_numpy()
 

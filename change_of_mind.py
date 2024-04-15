@@ -69,7 +69,8 @@ def _get_baseline_trial_number_fin_pos(fin_pos: np.array) -> list[np.array]:
 def _get_points_and_polygon(number_baseline_trials: list[np.array],
                             baseline_trials_dim_1: np.array,
                             baseline_trials_dim_2: np.array,
-                            n_std: float) -> tuple[list, list]:
+                            n_std: float,
+                            experiment_type: str) -> tuple[list, list]:
     '''
 
     :param number_baseline_trials:
@@ -89,31 +90,48 @@ def _get_points_and_polygon(number_baseline_trials: list[np.array],
         s_dim2 = n_std * np.std(baseline_trials_dim_2[n_bl_trials], axis=0)
 
         # The limits used for RIGHT AND LEFT come from a MATLAB file Chris provided (afaik)
-        # I did not have time to verify the limits for UP AND DOWN. So, change them appropriately
         # NOTICE THAT THE SECOND ARRAY HAS BEEN FLIPPED SO THAT THE POINTS FOLLOW AN ODER TO CREATE THE POLYGON
-        if direction == 0: # RIGHT
-            points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 + s_dim2)),
-                                np.column_stack((m_dim1 + s_dim1, m_dim2 - s_dim2))[::-1], axis=0)
-            points_list.append(points_)
-            polygons_list.append(Polygon(points_))
 
-        elif direction == 1: # LEFT
-            points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 - s_dim2)),
-                                np.column_stack((m_dim1 + s_dim1, m_dim2 + s_dim2))[::-1], axis=0)
-            points_list.append(points_)
-            polygons_list.append(Polygon(points_))
+        if experiment_type == "\/":
 
-        elif direction == 2: # UP
-            points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 + s_dim2)),
-                                np.column_stack((m_dim1 + s_dim1, m_dim2 + s_dim2))[::-1], axis=0)
-            points_list.append(points_)
-            polygons_list.append(Polygon(points_))
+            if direction == 0: # RIGHT
+                points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 + s_dim2)),
+                                    np.column_stack((m_dim1 + s_dim1, m_dim2 - s_dim2))[::-1], axis=0)
+                points_list.append(points_)
+                polygons_list.append(Polygon(points_))
 
-        elif direction == 3: # DOWN
-            points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 - s_dim2)),
-                                np.column_stack((m_dim1 + s_dim1, m_dim2 - s_dim2))[::-1], axis=0)
-            points_list.append(points_)
-            polygons_list.append(Polygon(points_))
+            elif direction == 1: # LEFT
+                points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 - s_dim2)),
+                                    np.column_stack((m_dim1 + s_dim1, m_dim2 + s_dim2))[::-1], axis=0)
+                points_list.append(points_)
+                polygons_list.append(Polygon(points_))
+
+        # I did not have time to verify the limits for UP AND DOWN. So, change them appropriately
+        elif experiment_type == "+":
+
+            if direction == 0:  # RIGHT
+                points_ = np.append(np.column_stack((m_dim1 + s_dim1, m_dim2 + s_dim2)),
+                                    np.column_stack((m_dim1 + s_dim1, m_dim2 - s_dim2))[::-1], axis=0)
+                points_list.append(points_)
+                polygons_list.append(Polygon(points_))
+
+            elif direction == 1:  # LEFT
+                points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 - s_dim2)),
+                                    np.column_stack((m_dim1 - s_dim1, m_dim2 + s_dim2))[::-1], axis=0)
+                points_list.append(points_)
+                polygons_list.append(Polygon(points_))
+
+            elif direction == 2: # UP
+                points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 + s_dim2)),
+                                    np.column_stack((m_dim1 + s_dim1, m_dim2 + s_dim2))[::-1], axis=0)
+                points_list.append(points_)
+                polygons_list.append(Polygon(points_))
+
+            elif direction == 3: # DOWN
+                points_ = np.append(np.column_stack((m_dim1 - s_dim1, m_dim2 - s_dim2)),
+                                    np.column_stack((m_dim1 + s_dim1, m_dim2 - s_dim2))[::-1], axis=0)
+                points_list.append(points_)
+                polygons_list.append(Polygon(points_))
 
         # fig = plt.figure()
         # gs = GridSpec(1, 1)
@@ -138,7 +156,14 @@ def _get_points_and_polygon(number_baseline_trials: list[np.array],
 def set_zones_changes_of_mind(baseline_trials_dim_1: np.array,
                               baseline_trials_dim_2: np.array,
                               fin_pos: np.array,
-                              n_std: float = 1.5):
+                              n_std: float,
+                              experiment_type: str):
+
+    try:
+        assert experiment_type == "\/" or experiment_type == "+", "Please indicate the type of experiment"
+    except AssertionError as msg:
+        print(msg)
+
     fin_pos = _center_fin_pos(fin_pos)
 
     # Call _get_baseline_trial_number_fin_pos
@@ -148,7 +173,8 @@ def set_zones_changes_of_mind(baseline_trials_dim_1: np.array,
     points_list, polygons_list = _get_points_and_polygon(number_baseline_trials,
                                                          baseline_trials_dim_1,
                                                          baseline_trials_dim_2,
-                                                         n_std)
+                                                         n_std,
+                                                         experiment_type)
     return polygons_list, points_list
 
 
@@ -158,10 +184,6 @@ def get_changes_of_mind_two_targets(polygons_list: list[Polygon],
                                     n_points: int = 10,
                                     center: np.array = np.array([0, 0]),
                                     radius: float = 0) -> int:
-    # s = GeoSeries(map(Point, zip(baseline_trials_dim_1[5], baseline_trials_dim_2[5])))
-    # res = s.within(polygon)
-    # ax.plot(baseline_trials_dim_1[5], baseline_trials_dim_2[5], 'r.')
-    # print(res)
 
     # If right, check left zone
     if data_dim1[-1] > 0:

@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from align_trajectories import align_trial_start
 
-from change_of_mind import _get_baseline_trial_number_fin_pos, _get_points_and_polygon
 from change_of_mind import set_zones_changes_of_mind, get_changes_of_mind_two_targets
 from change_of_mind import get_changes_of_mind_four_targets
 
@@ -42,7 +41,7 @@ for trial_number in range(1, n_baseline_trials + 1):
     data_bl_trials_dim2.append(y)
 
 polygons_list, points_list = set_zones_changes_of_mind(np.array(data_bl_trials_dim1), np.array(data_bl_trials_dim2),
-                                                       fin_pos_xy, 1.5)
+                                                       fin_pos_xy, 1.5, experiment_type="+")
 
 # central_stimulus_direction
 direction = pd.read_csv(path_, usecols=["central_stimulus_direction"])["central_stimulus_direction"].to_numpy()
