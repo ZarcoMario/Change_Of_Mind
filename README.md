@@ -14,3 +14,7 @@ and check that the number of points (N) defined to consider a trial a change of 
 is higher outside that region. This is not a necessary step but we used it 
 because we noticed some "false positives" as 
 there might be N points in the alternative region as a result of the a slow movement initiation.
+
+If you are intereste in visualization how the selection of the trials affect the 
+zone defined for the changes of mind, run interactive_chom.py. 
+You can select and unselect trajectories.
