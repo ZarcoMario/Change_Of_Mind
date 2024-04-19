@@ -138,7 +138,9 @@ class InteractiveTrajectories:
 
 if __name__ == "__main__":
 
-    path_folder_ = r"D:\mzar066\Jobs 2024\Research_Assistant\VR-S1\Results_VR_S1\Normalized_Trajetcories\P04"
+    import os
+
+    path_folder_ = os.getcwd() + r"\VR-S1\P01\Normalized_Trajectories"
     file_name_ = r"\normalized_trajectory_T"
     lower_bound = 1
     upper_bound = 16

@@ -27,7 +27,7 @@ def _center_fin_pos(fin_pos_xy: np.array):
 
 def _get_baseline_trial_number_fin_pos(fin_pos: np.array) -> list[np.array]:
     '''
-    This method assumes a '+'-like arrangement of the targets in the case of 4 of them
+    This method assumes a '+'-like arrangement of the targets in the case of 4 targets
     :param fin_pos:
     :return:
     '''
@@ -160,7 +160,7 @@ def set_zones_changes_of_mind(baseline_trials_dim_1: np.array,
                               experiment_type: str):
 
     try:
-        assert experiment_type == "\/" or experiment_type == "+", "Please indicate the type of experiment"
+        assert experiment_type == "\/" or experiment_type == "+", "Please indicate a correct type of experiment"
     except AssertionError as msg:
         print(msg)
 
